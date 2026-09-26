@@ -32,7 +32,11 @@ public class IngestionService {
                         .getPath(), parser);
         DocumentSplitter splitter = DocumentSplitters.recursive(300, 0);
         List<TextSegment> segments = splitter.split(document);
-        var embedding = embeddingModel.embedAll(segments).content();
-        embeddingStore.addAll(embedding);
+        int batchSize = 20;
+        for (int i = 0; i < segments.size(); i += batchSize) {
+            List<TextSegment> batch = segments.subList(i, Math.min(i + batchSize, segments.size()));
+            var embedding = embeddingModel.embedAll(batch).content();
+            embeddingStore.addAll(embedding, batch);
+        }
     }
 }

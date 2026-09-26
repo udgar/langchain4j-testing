@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 @Configuration
 public class EmbeddingConfiguration {
 
@@ -21,6 +23,8 @@ public class EmbeddingConfiguration {
                 .builder()
                 .baseUrl(baseUrl)
                 .modelName(embeddingModel)
+                .timeout(Duration.ofMinutes(15))
+                .maxRetries(0)
                 .build();
     }
 
@@ -30,9 +34,9 @@ public class EmbeddingConfiguration {
                 .builder()
                 .database("rag_demo")
                 .table("vector_store")
-                .createTable(false)
+                .createTable(true)
                 .dimension(768)
-                .host("jdbc:postgresql://localhost:5432/rag_demo")
+                .host("localhost")
                 .user("user")
                 .password("password")
                 .port(5432)
@@ -45,7 +49,7 @@ public class EmbeddingConfiguration {
         return EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel)
-                .maxResults(5)
+                .maxResults(3)
                 .minScore(0.9)
                 .build();
     }

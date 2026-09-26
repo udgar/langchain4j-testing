@@ -19,4 +19,9 @@ public class LangchainTestChatController {
     public String chat(){
         return service.chatUsingLangChain("Please introduce yourself");
     }
+
+    @GetMapping(value = "/query")
+    public String query(){
+        return service.inquiry("Explain how many sections are there in constitution of nepal");
+    }
 }
