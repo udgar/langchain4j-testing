@@ -1,45 +1,31 @@
 package com.langchain4j.test.rag.service;
 
-import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LangchainTestChatService {
 
-    private final String ollamaBaseUrl;
-
-    private final String ollamaCurrentModel;
-
     private final ContentRetriever contentRetriever;
 
-    public LangchainTestChatService(@Value("${ollama.base.url}") String ollamaBaseUrl, @Value("${ollama.model.name}") String ollamaCurrentModel, ContentRetriever contentRetriever) {
-        this.ollamaBaseUrl = ollamaBaseUrl;
-        this.ollamaCurrentModel = ollamaCurrentModel;
+    private final ChatModel chatModel;
+
+    public LangchainTestChatService(ContentRetriever contentRetriever, ChatModel chatModel) {
         this.contentRetriever = contentRetriever;
+        this.chatModel = chatModel;
     }
 
     public String chatUsingLangChain(String message) {
-        var ollamaChatModel = OllamaChatModel
-                .builder()
-                .baseUrl(ollamaBaseUrl)
-                .modelName(ollamaCurrentModel)
-                .build();
-        Assistant assistant = AiServices.builder(Assistant.class).chatModel(ollamaChatModel).build();
+        Assistant assistant = AiServices.builder(Assistant.class).chatModel(chatModel).build();
         return assistant.chat(message);
     }
 
     public String inquiry(String questions) {
-        var queryChatModel = OllamaChatModel
-                .builder()
-                .baseUrl(ollamaBaseUrl)
-                .modelName(ollamaCurrentModel)
-                .build();
         QueryAssistant queryAssistant = AiServices.builder(QueryAssistant.class)
-                .chatModel(queryChatModel)
+                .chatModel(chatModel)
                 .contentRetriever(contentRetriever)
                 .build();
         return queryAssistant.query(questions);
