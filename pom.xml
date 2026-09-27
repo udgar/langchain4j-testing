@@ -30,6 +30,7 @@
         <java.version>25</java.version>
         <spring-ai.version>2.0.1</spring-ai.version>
         <langchain4j.version>1.20.0</langchain4j.version>
+        <spring-openai-doc.version>3.1.1</spring-openai-doc.version>
     </properties>
     <dependencies>
         <dependency>
@@ -61,6 +62,11 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-pgvector</artifactId>
         </dependency>
+        <!-- Swagger Dependency -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -75,6 +81,13 @@
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
                 <version>${langchain4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-bom</artifactId>
+                <version>${spring-openai-doc.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
