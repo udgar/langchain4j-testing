@@ -1,9 +1,7 @@
 package com.langchain4j.test.rag.controller;
 
 import com.langchain4j.test.rag.service.LangchainTestChatService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/langchat")
@@ -16,12 +14,12 @@ public class LangchainTestChatController {
     }
 
     @GetMapping
-    public String chat(){
+    public String chat() {
         return service.chatUsingLangChain("Please introduce yourself");
     }
 
-    @GetMapping(value = "/query")
-    public String query(){
-        return service.inquiry("Explain how many sections are there in constitution of nepal");
+    @PostMapping(value = "/query")
+    public String query(@RequestBody String query) {
+        return service.inquiry(query);
     }
 }
