@@ -1,7 +1,9 @@
 package com.langchain4j.test.rag.config;
 
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
@@ -29,6 +31,18 @@ public class EmbeddingConfiguration {
     }
 
     @Bean
+    public ChatModel chatModel(@Value("${ollama.base.url}") String baseUrl
+            , @Value("${ollama.model.name}") String chatModelName){
+       return OllamaChatModel
+               .builder()
+               .baseUrl(baseUrl)
+               .modelName(chatModelName)
+               .timeout(Duration.ofMinutes(2))
+               .maxRetries(0)
+               .build();
+    }
+
+    @Bean
     public EmbeddingStore<TextSegment> embeddingStore() {
         return PgVectorEmbeddingStore
                 .builder()
@@ -49,8 +63,8 @@ public class EmbeddingConfiguration {
         return EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel)
-                .maxResults(3)
-                .minScore(0.9)
+                .maxResults(5)
+                .minScore(0.5)
                 .build();
     }
 }
