@@ -1,5 +1,6 @@
 package com.langchain4j.test.rag.config;
 
+import com.langchain4j.test.rag.service.IngestionService;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -14,6 +15,7 @@ import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,7 +25,7 @@ import java.util.List;
 @Configuration
 public class EmbeddingConfiguration {
 
-    private final Logger log=LoggerFactory.getLogger(EmbeddingConfiguration.class);
+    private final Logger log = LoggerFactory.getLogger(EmbeddingConfiguration.class);
 
     @Bean
     public EmbeddingModel embeddingModel(@Value("${ollama.base.url}") String baseUrl
@@ -39,15 +41,23 @@ public class EmbeddingConfiguration {
     }
 
     @Bean
+    ApplicationRunner ingestOnce(IngestionService ingestor,
+                                 @Value("${ingest.enabled:false}") boolean enabled) {
+        return args -> {
+            if (enabled) ingestor.ingestDocument();
+        };
+    }
+
+    @Bean
     public ChatModel chatModel(@Value("${ollama.base.url}") String baseUrl
-            , @Value("${ollama.model.name}") String chatModelName){
-       return OllamaChatModel
-               .builder()
-               .baseUrl(baseUrl)
-               .modelName(chatModelName)
-               .timeout(Duration.ofMinutes(2))
-               .maxRetries(0)
-               .build();
+            , @Value("${ollama.model.name}") String chatModelName) {
+        return OllamaChatModel
+                .builder()
+                .baseUrl(baseUrl)
+                .modelName(chatModelName)
+                .timeout(Duration.ofMinutes(2))
+                .maxRetries(0)
+                .build();
     }
 
     @Bean
@@ -56,6 +66,7 @@ public class EmbeddingConfiguration {
                 .builder()
                 .database("rag_demo")
                 .table("vector_store")
+                .dropTableFirst(true)
                 .createTable(true)
                 .dimension(768)
                 .host("localhost")
@@ -68,14 +79,14 @@ public class EmbeddingConfiguration {
     @Bean
     public ContentRetriever contentRetriever(EmbeddingStore<TextSegment> embeddingStore
             , EmbeddingModel embeddingModel) {
-        ContentRetriever delegate=EmbeddingStoreContentRetriever.builder()
+        ContentRetriever delegate = EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel)
-                .maxResults(5)
-                .minScore(0.5)
+                .maxResults(8)
+                .minScore(0.3)
                 .build();
-        return query->{
-            List<Content> contents=delegate.retrieve(query);
+        return query -> {
+            List<Content> contents = delegate.retrieve(query);
             log.info("RAG query='{}' -> {} chunk(s)", query.text(), contents.size());
             contents.forEach(c -> log.info("score={} id={} text={}",
                     c.metadata().get(ContentMetadata.SCORE),
