@@ -1,6 +1,8 @@
 package com.langchain4j.test.rag.service;
 
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.rag.DefaultRetrievalAugmentor;
+import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
@@ -24,9 +26,13 @@ public class LangchainTestChatService {
     }
 
     public String inquiry(String questions) {
+        RetrievalAugmentor augmentor = DefaultRetrievalAugmentor.builder()
+                .contentRetriever(contentRetriever)
+                // .queryTransformer(new ExpandingQueryTransformer(chatModel))  // enable only if recall is poor
+                .build();
         QueryAssistant queryAssistant = AiServices.builder(QueryAssistant.class)
                 .chatModel(chatModel)
-                .contentRetriever(contentRetriever)
+                .retrievalAugmentor(augmentor)
                 .build();
         return queryAssistant.query(questions);
     }
@@ -38,7 +44,11 @@ public class LangchainTestChatService {
     }
 
     interface QueryAssistant {
-        @SystemMessage("You are a chat assistant that only answers questions, regarding the information stored in vector store, if asked for anything else deny the request")
+        @SystemMessage("""
+                You answer only from the provided excerpts of the Constitution of Nepal.
+                Cite the Article number for every claim. If the excerpts don't contain the answer, say so.
+                Refuse anything unrelated to the Constitution.
+                """)
         String query(String message);
     }
 }
