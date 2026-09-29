@@ -30,7 +30,7 @@ public class IngestionService {
         Document document = FileSystemDocumentLoader
                 .loadDocument(IngestionService.class.getResource("/docs/Constitution-of-Nepal.pdf")
                         .getPath(), parser);
-        DocumentSplitter splitter = DocumentSplitters.recursive(300, 0);
+        DocumentSplitter splitter = DocumentSplitters.recursive(400, 50);
         List<TextSegment> segments = splitter.split(document);
         int batchSize = 20;
         for (int i = 0; i < segments.size(); i += batchSize) {
