@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/ingestion")
 public class IngestionController {
@@ -16,7 +18,7 @@ public class IngestionController {
     }
 
     @GetMapping
-    public String ingestion() {
+    public String ingestion() throws IOException {
         service.ingestDocument();
         return "Done Ingestion";
     }
